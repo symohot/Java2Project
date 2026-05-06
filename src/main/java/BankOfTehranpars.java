@@ -1,7 +1,7 @@
 import jakarta.jms.*;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
-public class BankTehranpars {
+public class BankOfTehranpars {
     public static void main(String[] args) {
         try {
             ConnectionFactory conFac = new ActiveMQConnectionFactory("tcp://localhost:61616");
@@ -18,6 +18,7 @@ public class BankTehranpars {
             }
             session.commit();
             session.close();
+            producer.close();
             con.close();
         } catch (JMSException e) {
             throw new RuntimeException(e);

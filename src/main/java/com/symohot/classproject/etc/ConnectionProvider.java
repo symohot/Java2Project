@@ -11,7 +11,7 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 public class ConnectionProvider {
     private static final EntityManagerFactory emf = Persistence.createEntityManagerFactory("default");
     private static final ConnectionFactory conFac = new ActiveMQConnectionFactory("tcp://127.0.0.1:61616");
-    public static Connection jsmCon() {
+    public static Connection jmsCon() {
         try {
             return conFac.createConnection();
         } catch (JMSException e) {

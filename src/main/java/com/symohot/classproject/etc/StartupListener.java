@@ -11,8 +11,7 @@ public class StartupListener implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        messConsumer = new MessConsumer(ConnectionProvider.jsmCon(),new AccountService());
-        messConsumer.start();
+        messConsumer = new MessConsumer();
     }
 
     @Override

@@ -5,31 +5,24 @@ import com.symohot.classproject.model.service.AccountService;
 import jakarta.jms.*;
 
 public class MessConsumer implements MessageListener {
+    private final AccountService accServ = new AccountService();
     private final Connection connection;
     private final Session session;
-    private MessageConsumer consumer;
-    private final AccountService accServ;
+    private final MessageConsumer consumer;
 
-    public MessConsumer(Connection connection, AccountService accountService) {
-        this.connection = connection;
+    public MessConsumer() {
         try {
+            this.connection = ConnectionProvider.jmsCon();
             this.session = connection.createSession(true, Session.SESSION_TRANSACTED);
-        } catch (JMSException e) {
-            throw new RuntimeException(e);
-        }
-        this.accServ = accountService;
-    }
-
-    public void start() {
-        try {
             Destination destination = session.createQueue("BON.REQ");
-            consumer = session.createConsumer(destination);
+            this.consumer = session.createConsumer(destination);
             consumer.setMessageListener(this);
             connection.start();
         } catch (JMSException e) {
             throw new RuntimeException(e);
         }
     }
+
     public void stop() {
         try {
             consumer.close();
@@ -47,7 +40,7 @@ public class MessConsumer implements MessageListener {
     public void onMessage(Message message) {
         try {
             if (message instanceof MapMessage mapMessage) {
-                accServ.tranFromBankB(new TranDto(mapMessage.getString("originAccount"),
+                accServ.fromBankB(new TranDto(mapMessage.getString("originAccount"),
                         mapMessage.getString("destinationAccount"),
                         mapMessage.getString("amount")));
                 session.commit();
