@@ -60,19 +60,21 @@ public class AccountService {
                 tranDto.destinationAccount().isBlank() ||
                 tranDto.amount().isBlank()) throw new RuntimeException("Fields must not be blank");
         else if (!tranDto.originAccount().startsWith("100")) throw new RuntimeException("This platform is for transferring money between accounts in bank of Narmak OR between accounts in bank of Narmak and bank of Tehranpars, Origin account number must start with '100'");
-        else if (!tranDto.destinationAccount().startsWith("100") ||
-                !tranDto.destinationAccount().startsWith("200")) throw new RuntimeException("This platform is for accounts in Bank of Tehranpars or Narmak, destination account number must start with '100' or '200'");
+        else if (!(tranDto.destinationAccount().startsWith("100") ||
+                tranDto.destinationAccount().startsWith("200"))) throw new RuntimeException("This platform is for accounts in Bank of Tehranpars or Narmak, destination account number must start with '100' or '200'");
         else return true;
     }
     private void innerTran(TranDto tranDto){
         Optional<Account> origin = Optional.ofNullable(findFromDb(tranDto.originAccount()));
         Optional<Account> destin = Optional.ofNullable(findFromDb(tranDto.destinationAccount()));
 
-        if (origin.isEmpty()) throw new RuntimeException("OriginAccount not found");
-        else if (origin.get().getStatus().equals(Status.BANNED)) throw new RuntimeException("OriginAccount is banned");
-        else if (origin.get().getAmount()>Long.parseLong(tranDto.amount())) throw new RuntimeException("OriginAccount's amount isn't enough");
-        else if (destin.isEmpty()) throw new RuntimeException("DestinationAccount not found");
-        else if (destin.get().getStatus().equals(Status.BANNED)) throw new RuntimeException("DestinationAccount is banned");
+        if (origin.isEmpty()) throw new RuntimeException("OriginAccount "+tranDto.originAccount()+" not found");
+        else if (origin.get().getStatus().equals(Status.BANNED)) throw new RuntimeException("OriginAccount "+tranDto.originAccount()+" is banned");
+        else if (origin.get().getStatus().equals(Status.CLOSED)) throw new RuntimeException("OriginAccount "+tranDto.originAccount()+" is closed");
+        else if (origin.get().getAmount()<Long.parseLong(tranDto.amount())) throw new RuntimeException("OriginAccount "+tranDto.originAccount()+"'s amount isn't enough");
+        else if (destin.isEmpty()) throw new RuntimeException("DestinationAccount "+tranDto.destinationAccount()+" not found");
+        else if (destin.get().getStatus().equals(Status.BANNED)) throw new RuntimeException("DestinationAccount "+tranDto.destinationAccount()+" is banned");
+        else if (destin.get().getStatus().equals(Status.CLOSED)) throw new RuntimeException("DestinationAccount "+tranDto.destinationAccount()+" is closed");
         else {
             TranMsg tranMsg = makeTranEntity(tranDto);
             accRepo.withdraw(tranMsg.getOriginAccount(), tranMsg.getAmount(), ConnectionProvider.entCon());
@@ -80,6 +82,12 @@ public class AccountService {
         }
     }
     private void outerTran(TranDto tranDto){
+        Optional<Account> origin = Optional.ofNullable(findFromDb(tranDto.originAccount()));
+
+        if (origin.isEmpty()) throw new RuntimeException("OriginAccount "+tranDto.originAccount()+" not found");
+        else if (origin.get().getStatus().equals(Status.BANNED)) throw new RuntimeException("OriginAccount "+tranDto.originAccount()+" is banned");
+        else if (origin.get().getStatus().equals(Status.CLOSED)) throw new RuntimeException("OriginAccount is "+tranDto.originAccount()+" closed");
+        else if (origin.get().getAmount()<Long.parseLong(tranDto.amount())) throw new RuntimeException("OriginAccount "+tranDto.originAccount()+"'s amount isn't enough");
         try {
             JMSInit("BOT.REQ");
             MapMessage msg = session.createMapMessage();
@@ -121,8 +129,9 @@ public class AccountService {
         else if (Long.parseLong(tranDto.amount())<=0) throw new RuntimeException("Amount can't be negative");
 
         Optional<Account> destin = Optional.ofNullable(findFromDb(tranDto.destinationAccount()));
-        if (destin.isEmpty()) throw new RuntimeException("DestinationAccount not found");
-        else if (destin.get().getStatus().equals(Status.BANNED)) throw new RuntimeException("DestinationAccount is banned");
+        if (destin.isEmpty()) throw new RuntimeException("DestinationAccount "+tranDto.destinationAccount()+" not found");
+        else if (destin.get().getStatus().equals(Status.BANNED)) throw new RuntimeException("DestinationAccount "+tranDto.destinationAccount()+" is banned");
+        else if (destin.get().getStatus().equals(Status.CLOSED)) throw new RuntimeException("DestinationAccount "+tranDto.destinationAccount()+" is closed");
         else return true;
     }
     private void msgProducer (String msg){

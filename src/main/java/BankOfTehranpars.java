@@ -12,7 +12,7 @@ public class BankOfTehranpars {
             MessageProducer producer = session.createProducer(destination);
             for (int i = 1; i < 5; i++) {
                 message.setString("originAccount", "200"+i);
-                message.setString("destinationAccount", "1001");
+                message.setString("destinationAccount", "100"+i);
                 message.setString("amount", String.valueOf(500*i));
                 producer.send(message);
             }

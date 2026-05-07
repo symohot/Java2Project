@@ -5,6 +5,7 @@
     <title>Account - JSP - JMS - Servlet</title>
 </head>
 <body>
+<div><p>${messageT}</p></div>
 <form action="TransferServlet" method="post">
     <fieldset>
         <legend>Transfer Money</legend>

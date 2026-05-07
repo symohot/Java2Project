@@ -29,6 +29,14 @@ public class Account {
         this.status = status;
     }
 
+    public String getAccountNumber() {
+        return accountNumber;
+    }
+
+    public void setAccountNumber(String accountNumber) {
+        this.accountNumber = accountNumber;
+    }
+
     public String getFirstName() {
         return firstName;
     }

@@ -5,6 +5,7 @@
     <title>Account - JSP - JMS - Servlet</title>
 </head>
 <body>
+<div><p>${messageC}</p></div>
 <form action="CreateAccountServlet" method="post">
     <fieldset>
         <legend>Register Account In Bank Narmak</legend>

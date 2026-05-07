@@ -7,6 +7,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 
@@ -20,9 +21,17 @@ public class TransferServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        accServ.tranCheck(new TranDto(req.getParameter("originAccount"),
-                req.getParameter("destinationAccount"),
-                req.getParameter("amount")));
+        resp.setContentType("text/html");
+        HttpSession session = req.getSession();
+        try {
+            accServ.tranCheck(new TranDto(req.getParameter("originAccount"),
+                    req.getParameter("destinationAccount"),
+                    req.getParameter("amount")));
+            session.setAttribute("messageT", "Transferring Successful");
+        } catch (RuntimeException e) {
+            session.setAttribute("messageT", e.getMessage());
+        }finally {
+            resp.sendRedirect("transfer.jsp");
+        }
     }
-
 }

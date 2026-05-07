@@ -7,6 +7,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 
@@ -20,10 +21,19 @@ public class CreateAccountServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        accServ.saveInDb(new RegDto(req.getParameter("accountNumber"),
-                req.getParameter("firstName"),
-                req.getParameter("lastName"),
-                req.getParameter("amount"),
-                req.getParameter("status")));
+        resp.setContentType("text/html");
+        HttpSession session = req.getSession();
+        try {
+            accServ.saveInDb(new RegDto(req.getParameter("accountNumber"),
+                    req.getParameter("firstName"),
+                    req.getParameter("lastName"),
+                    req.getParameter("amount"),
+                    req.getParameter("status")));
+            session.setAttribute("messageC", "Registration Successful");
+        } catch (RuntimeException e) {
+            session.setAttribute("messageC", e.getMessage());
+        } finally {
+            resp.sendRedirect("index.jsp");
+        }
     }
 }
